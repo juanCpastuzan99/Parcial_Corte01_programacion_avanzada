@@ -113,11 +113,11 @@
                                     {{ enlace.enlaceOriginal }}
                                 </td>
 
-                                <!-- Enlace Corto -->
+                                <!-- ✅ Enlace Corto dinámico -->
                                 <td>
-                                        <span class="badge bg-primary font-monospace">
-                                            127.0.0.1:3000/{{ enlace.enlaceAcortado }}
-                                        </span>
+                                    <span class="badge bg-primary font-monospace">
+                                        {{ enlace.enlace_corto }}
+                                    </span>
                                 </td>
 
                                 <!-- Descripción -->
@@ -133,8 +133,9 @@
                                 <!-- Acciones -->
                                 <td>
                                     <div class="d-flex gap-1">
+                                        <!-- ✅ Botón copiar con enlace dinámico -->
                                         <button class="btn btn-outline-success btn-sm"
-                                            onclick="copiar('http://127.0.0.1:3000/{{ enlace.enlaceAcortado }}')">
+                                            onclick="copiar('{{ enlace.enlace_corto }}')">
                                             Copiar
                                         </button>
                                         <button class="btn btn-outline-danger btn-sm"

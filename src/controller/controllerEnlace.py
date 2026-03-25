@@ -17,7 +17,6 @@ def acortar_enlace():
         if not enlace_original:
             return jsonify({"error": "El enlace original es obligatorio"}), 400
 
-        # ✅ Verificar si el enlace original ya existe
         db = get_connection_mysql()
         cursor = db.cursor()
         cursor.execute(
@@ -29,14 +28,13 @@ def acortar_enlace():
             db.close()
             return redirect('/?error=Este enlace ya fue acortado anteriormente')
 
-        # Generar código único (que no esté repetido en BD)
         while True:
             codigo = generar_codigo()
             cursor.execute(
                 "SELECT id FROM enlaces WHERE enlaceAcortado = %s", (codigo,)
             )
             if not cursor.fetchone():
-                break  # El código no existe, se puede usar
+                break
 
         enlace = Enlace(enlace_original, codigo, descripcion)
         cursor.execute(
@@ -64,6 +62,9 @@ def listar_enlaces():
         rows = cursor.fetchall()
         db.close()
 
+        # ✅ Detectar automáticamente el host donde corre la app
+        base_url = request.host_url  # Ej: http://127.0.0.1:3000/ o cualquier otro host
+
         # Traer imágenes de MongoDB
         imagenes = {
             doc["enlaceAcortado"]: doc["url"]
@@ -73,6 +74,8 @@ def listar_enlaces():
 
         for row in rows:
             row["imagen"] = imagenes.get(row["enlaceAcortado"], None)
+            # ✅ Generar el enlace corto con el host dinámico
+            row["enlace_corto"] = f"{base_url}{row['enlaceAcortado']}"
 
         return render_template('enlaces.html', enlaces=rows)
     except Exception as e:
@@ -83,7 +86,7 @@ def listar_enlaces():
 def redirigir_enlace(codigo):
     try:
         db = get_connection_mysql()
-        cursor = db.cursor()  # ← fix: sin dictionary ni buffered
+        cursor = db.cursor()
         cursor.execute("SELECT * FROM enlaces WHERE enlaceAcortado = %s", (codigo,))
         row = cursor.fetchone()
         db.close()
